@@ -165,4 +165,55 @@ func UpdateUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	db, erro := banco.Conectar()
+	if erro != nil {
+		w.Write([]byte("Erro ao conectar no banco de dados"))
+		return
+	}
+	defer db.Close()
+
+	statement, erro := db.Prepare("UPDATE usuarios SET nome = ?, email = ? WHERE id = ?")
+	if erro != nil {
+		w.Write([]byte("Erro ao preparar o statement"))
+		return
+	}
+	defer statement.Close()
+
+	if _, err := statement.Exec(usuario.Nome, usuario.Email, id); err != nil {
+		w.Write([]byte("Erro ao atulizar o usuário"))
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func DeleteUsuario(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+
+	id, erro := strconv.ParseUint(parametros["id"], 10, 32)
+	if erro != nil {
+		w.Write([]byte("Erro ao ler parametro Id"))
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		w.Write([]byte("Erro ao conectar com banco de dados"))
+		return
+	}
+	defer db.Close()
+
+	statement, erro := db.Prepare("DELETE FROM usuarios WHERE id = ?")
+	if erro != nil {
+		w.Write([]byte("Erro ao preparar o statement"))
+		return
+	}
+	defer statement.Close()
+
+	if _, erro := statement.Exec(id); erro != nil {
+		w.Write([]byte("Erro ao deletar o usuário"))
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
