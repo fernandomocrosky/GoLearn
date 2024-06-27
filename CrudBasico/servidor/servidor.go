@@ -146,11 +146,23 @@ func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 func UpdateUsuario(w http.ResponseWriter, r *http.Request) {
 	parametros := mux.Vars(r)
 
-	ID, erro := strconv.ParseUint(parametros["id"], 10, 32)
+	id, erro := strconv.ParseUint(parametros["id"], 10, 32)
 	if erro != nil {
 		w.Write([]byte("Erro ao ler parametro Id"))
 		return
 	}
 
 	body, erro := io.ReadAll(r.Body)
+	if erro != nil {
+		w.Write([]byte("Erro ao ler o corpo da requsição"))
+		return
+	}
+
+	var usuario usuario
+
+	if erro := json.Unmarshal(body, &usuario); erro != nil {
+		w.Write([]byte("Erro ao converter corpo da requisição para struct"))
+		return
+	}
+
 }
